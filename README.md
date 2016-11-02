@@ -1,6 +1,7 @@
 # basic-text-editor
 
 Shriya Shende
+
 MIS: 111508063
 
 This text editor performs the following functions: 
@@ -13,4 +14,5 @@ This text editor performs the following functions:
             7. Creates a new file.
 
 All the above functions are made using doubly linked list.
+
 It has been made using the ncurses.h and menu.h
