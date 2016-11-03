@@ -1,50 +1,43 @@
-#include <stdio.h>
-#include <string.h>
-#include <menu.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
+/*Copyright 2016 Shriya Shende
+This program is a part of the project Charlie.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#define MAXCHAR 80
-#define MAX_FN_CHAR 10
-#define MAX_CMDCHAR 5
+#ifndef Commend_h
+#define Commend_h
 
+void commendDisplay(WINDOW *editWin,WINDOW *comWin);
+void copyWord(WINDOW *editWin,int *prev,int *flag,int buf[]);
+void copyLine(WINDOW *editWin,int *prev,int *flag,int buf[]);
+void pasteWord(WINDOW *editWin,int *prev,int *flag,int buf[]);
+void pasteLine(WINDOW *editWin,int *prev,int *flag,int buf[]);
+void replaceChar(WINDOW *editWin,int *flag);
+void replaceLine(WINDOW *editWin,int *flag);
+void setBoldChar(WINDOW *editWin,int *flag);
+void setBlodAndReplace(WINDOW *editWin,int *prev,int *flag);
+void setBoldWord(WINDOW *editWin,int *prev,int*flag);
+void delX(WINDOW *editWin,int *flag,int *buf);
+void delWord(WINDOW *editWin,int *prev,int *flag,int *buf);
+void delLine(WINDOW *editWin,int *prev,int *flag,int *buf);
+void delToEnd(WINDOW *editWin,int *prev,int *flag);
+void moveWord(WINDOW *editWin,int *prev,int *flag);
+void moveLineEnd(WINDOW *editWin,int *prev,int *flag);
+void moveNum(WINDOW *editWin,int *prev,int *flag);
+void insertLineUnder(WINDOW *editWin,WINDOW *comWin,int *prev,int ch,int *flag);
+void insertLineAbove(WINDOW *editWin,WINDOW *comWin,int *prev,int ch,int *flag);
+void setHighLight(WINDOW *editWin,int *flag);
+void backspaceDel(WINDOW *win,int *flag);
+void enterKey(WINDOW *win,int *flag);
+void tabKey(WINDOW *editWin,int *flag);
+void isPrintI(WINDOW *editWin,WINDOW *comWin,int *prev,int ch,int *flag);
 
-typedef struct node {
-	char string[MAXCHAR];
-	int line_numb;
-	struct node *next, *prev; 
-}node;
-
-typedef struct list {
-	node *front, *rear;
-	int line_ctr;
-}list;
-
-void InitialiseBuffer(list *fb);				/*Initialising the list*/
-
-int BufferEmpty(list *fb);					/*Checking if buffer is empty*/
-
-int BufferFull(list *fb);					/*Checking if buffer is full*/
-
-void AppendtoBuffer(list *fb, char *ReadLine);			/*Will store the read line in a new node and link to end of file buffer */
-
-void PrintBuffer(list *fb, WINDOW *the_window_menu);		/*Will print the entire file (in the buffer)*/
-
-void OpenFile(list *fb, char *Filename);				/*Will open a file in the buffer*/
-
-void SaveFile(list *fb, char *Filename);			/*Will save the buffer as a file*/
-
-void FreeBuffer(list *fb); 					/*Will free the entire buffer*/
-
-void EditBuffer(list *fb, int LineNo, char *NewString);		/*Will edit a line in the file*/
-
-void InsertBuffer(list *fb, int LineNo, char *InsertString);	/*Will insert a node in the buffer*/
-
-void popStr(list *myList, char *tmp);
-
-void undo(list *fb, list *cmdHistory, list *histContent, list *backupBuffer); /*Will undo previous operation*/
-
-void replace(list *fb,int atLine,char *restOfString);		/*Will replace content in particular node*/
-
-void DeleteBufferLineNo(list *fb, int LineNo);			/*Will delete a node from the buffer given line number*/
+#endif
