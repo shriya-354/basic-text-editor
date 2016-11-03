@@ -1,140 +1,181 @@
-#include <curses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <menu.h>
-#include "window.h"
+/*Copyright 2016 Shriya Shende
+This program is a part of the project Charlie.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#define MENU_OPTIONS 10
+#include<stdlib.h>
+#include<ncurses.h>
+#include<ctype.h>
+#include"edit.h"
+#include"commend.h"
+#include"save.h"
 
-char *menu_options[] = {
-	"Open",
-	"New",
-	"Edit",
-	"undo",
-	"replace",
-	"delete",
-	"Save",
-	"Save As",
-	"Exit",
-};
-						
-int nchoices = (sizeof(menu_options)) / (sizeof(char *));
+#define COM_MODEL 0
+#define INS_MODEL 1
+#define SAVE_MODEL 2
+#define VK_TAB 9
+#define VK_ENTER 10
+#define WORD_BUF_NUM 20
+#define VK_ESCAPE 27
+#define VK_EDIT 58
+#define LINE_BUF_NUM 135
 
-int main() {
-	/*the_window window
-	menu_window menu_window
-	abscissa abscissa
-	ordinate ordinate*/
-	WINDOW *the_window, *menu_window, *the_window_menu;
-	ITEM **my_items;
-	MENU *my_menu;
-	list *fb;
-	
-	int height, width, abscissa, ordinate, exit = 0;
-	int highlight = 1;
-	int ch, c, choice = 0, i, j;
-	char str[81];
-	
-	fb = (list *)malloc(sizeof(list));
-	if (fb == NULL)
-		return;
-	
-	InitialiseBuffer(fb);
-	
-	initscr();
-	clear();
-	noecho();
-	cbreak();
-	start_color();
-	/*Checking whether the terminal supports colors*/
-	if (has_colors() == FALSE){
-		endwin();
-		printf("Your terminal does not support colors\n");
+int main(int argc,char *argv[])	{
+	if(argc < 2) {
+		fprintf(stderr,"请输入文件名\n");
+		exit(1);
 	}
-	keypad(stdscr, TRUE);
-	height = 3;
-	width = 10;
-	ordinate = (LINES - height)/2;
-	abscissa = (COLS - width) / 2;	
-	refresh();
+	else {
+		FILE *fp;
+		fp = fopen(argv[1],"r+");
+		if(fp == NULL) {
+			char create;
+			fprintf(stdout,"您输入的文件不存在，是否创建？（Y/N）");
+			fscanf(stdin,"%c",&create);
+			if(create == 'Y' || create == 'y') {
+				fp = fopen(argv[1],"w");
+				fclose(fp);
+			}	
+			if(fp == NULL) {
+				fprintf(stderr,"文件打开失败或创建文件失败\n");
+				exit(1);
+			}
+			else
+				fprintf(stdout,"文件创建成功！\n");
+		} 
+		else {
+			int y,x,YMax,XMax;
+			int ch,prev = EOF;
+			int quit = false;
+			int charBuf;
+			int lastLine;
+			WINDOW *editWin,*comWin;
+			int flag = COM_MODEL;
+			int wordBuf[WORD_BUF_NUM],lineBuf[LINE_BUF_NUM];
 
-	the_window = Create_Window(height, width, ordinate, abscissa);
-	mvwhline(the_window, 5, 1,	ACS_HLINE, width - 1);
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_CYAN, COLOR_BLACK);
+			initscr();
+			start_color();
+			cbreak();
+			noecho();
+			editWin = derwin(stdscr,LINES- 1,COLS,0,0);
+			comWin = derwin(stdscr,1,COLS,LINES - 1,0);
+			scrollok(editWin,TRUE);
+			refresh();
+			keypad(stdscr,TRUE);
+			keypad(editWin,TRUE);
+			keypad(comWin,TRUE);
+			while((ch = getc(fp)) != EOF) {
+				waddch(editWin,ch);
+			}
+			getYMaxx(editWin,YMax,XMax);
+			lastLine = getLastLine(editWin,YMax,XMax);
+			wmove(editWin,0,0);	
+			commendDisplay(editWin,comWin);
+			while((ch = wgetch(editWin)) != EOF && quit == false) {
+				switch(ch) {
+					case KEY_RIGHT : getyx(editWin,y,x);
+									 wmove(editWin,y,++x);
+									 commendDisplay(editWin,comWin);
+									 break;
+					case KEY_LEFT : getyx(editWin,y,x);
+									wmove(editWin,y,--x);
+								    commendDisplay(editWin,comWin);
+									break;
 
-	/* Create items */
-	my_items = (ITEM **)calloc(nchoices, sizeof(ITEM *));
-	for(i = 0; i < nchoices; ++i)
-		my_items[i] = new_item(menu_options[i], menu_options[i]);
+					case KEY_DOWN : getyx(editWin,y,x);
+                                                                    wmove(editWin,++y,x);
+                                                                    commendDisplay(editWin,comWin);
+                                                                    break;
 
-	/* Create menu */	
-	my_menu = new_menu((ITEM **)my_items);
+					 case KEY_UP : getyx(editWin,y,x);
+                                                                  wmove(editWin,--y,x);
+                                                                  commendDisplay(editWin,comWin);
+                                                                  break;
 
-	/* Set menu option not to show the description */
-	menu_opts_off(my_menu, O_SHOWDESC);
+					case VK_ESCAPE : flag = COM_MODEL;break;
+					case VK_EDIT : quit = isPrint(editWin,comWin,fp,&prev,ch,&flag,lastLine);
+								   insert(editWin,comWin,&prev,ch,&flag);
+								   break;
+					case KEY_BACKSPACE : backspaceDel(editWin,&flag);
+                                                                     commendDisplay(editWin,comWin);
+                                                                                 break;
+                                        case VK_ENTER : enterKey(editWin,&flag);
+                                                                commendDisplay(editWin,comWin);
+                                                                        break;
 
-	/* Create the window to be associated with the menu */
-	the_window_menu = newwin(0, 0, 0, 0);
-	keypad(the_window_menu, TRUE);
-
-	/* Set main window and sub window */
-	set_menu_win(my_menu, the_window_menu);
-	set_menu_sub(my_menu, derwin(the_window_menu, 0, 0, 0, 0));
- 	set_menu_format(my_menu, 1, 6);
-	set_menu_mark(my_menu, " * ");
-
-	/* Post the menu */
-	post_menu(my_menu);
-	wrefresh(the_window_menu);
-	
-	i = 0;
-	mvwhline(the_window_menu, 1, 0, ACS_HLINE, COLS);
-	mvwprintw(the_window_menu, LINES - 1, 0, "Press F3 to go to the menu, F6 to exit", c);
-	
-	while(1){
-		choice = Toggle_Menu(the_window_menu, my_menu, i);
-		i = choice;
-		switch(choice){
-			case 0:
-				Open_File(fb, the_window_menu);
-				break;
-			case 1:
-				New_File(fb, the_window_menu, my_menu);
-				break;
-			case 2:
-				Edit_File(fb, the_window_menu);
-				break;
-			case 3:
-				Save_File(fb, the_window_menu);
-				break;
-			case 4:
-				Save_As(fb, the_window_menu);
-				break;
-			case 5:
-				Exit(fb, the_window_menu);
-				exit = 1;
-				break;
-			default:
-				break;
+                                        case VK_TAB : tabKey(editWin,&flag);
+                                                              commendDisplay(editWin,comWin);
+                                                                  break;
+ 
+					case 'i' : isPrintI(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'x' : delX(editWin,&flag,&charBuf);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'B' : setBoldChar(editWin,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'C' : setHighLight(editWin,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'w' : delWord(editWin,&prev,&flag,wordBuf);
+							   copyWord(editWin,&prev,&flag,wordBuf);
+							   pasteWord(editWin,&prev,&flag,wordBuf);
+							   moveWord(editWin,&prev,&flag);
+							   setBoldWord(editWin,&prev,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'l' : delLine(editWin,&prev,&flag,lineBuf);
+							   copyLine(editWin,&prev,&flag,lineBuf);
+							   pasteLine(editWin,&prev,&flag,lineBuf);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'e' : delToEnd(editWin,&prev,&flag);
+							   moveLineEnd(editWin,&prev,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'G' : moveNum(editWin,&prev,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'r' : replaceChar(editWin,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'o' : insertLineUnder(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'O' : insertLineAbove(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					case 'R' : replaceLine(editWin,&flag);
+							   insert(editWin,comWin,&prev,ch,&flag);
+							   commendDisplay(editWin,comWin);
+							   break;
+					default : insert(editWin,comWin,&prev,ch,&flag);
+							  commendDisplay(editWin,comWin);
+							  break; 
+				}
+				
+			}
+			endwin();
 		}
-		if (exit)
-			break;
 	}
-	/*Assertion: the user wants to exit the program*/
-		
-	/* Unpost and free all the memory taken up */
-	unpost_menu(my_menu);
-	free_menu(my_menu);
-	for(j = 0; j < nchoices; ++j)
-		free_item(my_items[j]);
-                
-	clrtoeol();
-	refresh();	
-	
-	/*Ending curses mode*/
-	endwin();
 	return 0;
 }
