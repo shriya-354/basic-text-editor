@@ -108,7 +108,7 @@ int main(int argc,char *argv[]) {
 							insert(editWin, comWin, &prev, ch, &flag);
 							commendDisplay(editWin, comWin);
 							break;
-					case 'w' : delWord(editWin, &prev, &flag, wordBuf);
+					/*case 'w' : delWord(editWin, &prev, &flag, wordBuf);
 							copyWord(editWin, &prev, &flag, wordBuf);
 							pasteWord(editWin, &prev, &flag, wordBuf);
 							moveWord(editWin, &prev, &flag);
@@ -116,6 +116,7 @@ int main(int argc,char *argv[]) {
 							insert(editWin, comWin, &prev, ch, &flag);
 							commendDisplay(editWin, comWin);
 							break;
+					*/
 					case 'l' : delLine(editWin, &prev, &flag, lineBuf);
 							copyLine(editWin, &prev, &flag, lineBuf);
 							pasteLine(editWin, &prev, &flag, lineBuf);
