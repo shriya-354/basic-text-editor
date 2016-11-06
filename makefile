@@ -1,4 +1,4 @@
 project: texteditor.c texteditor.h
-	cc  -texteditor -o project -lncurses -lmenu
+	cc  -texteditor.c -o project -lncurses -lmenu
 clean: 
 	rm *.o
