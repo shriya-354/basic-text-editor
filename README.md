@@ -8,7 +8,7 @@ This text editor performs the following functions:
 			            	1. Opens a file 
 					2. Edits an opened file 
 					3. copy a word or a line
-					4. Replace. 
+					4. Replaces a character or the complete line 
                                         5. delete a word or a line
 					6. Saves					            									7. prints the data
 
