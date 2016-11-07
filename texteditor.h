@@ -27,7 +27,7 @@
 #define WORD_BUF_NUM 20
 #define VK_ESCAPE 27
 #define VK_EDIT 58
-#define LINE_BUF_NUM 153
+#define LINE_BUF_NUM 256
 
 void commendDisplay(WINDOW *editWin, WINDOW *comWin);
 void delX(WINDOW *editWin, int *flag, int *buf);
