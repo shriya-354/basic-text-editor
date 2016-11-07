@@ -69,24 +69,24 @@ int main(int argc,char *argv[]) {
 			getmaxyx(editWin, maxy, maxx);
 			lastLine = getLastLine(editWin, maxy, maxx);
 			wmove(editWin, 0, 0); /* moves the cursor to rowth row and colth column */
-			commendDisplay(editWin, comWin);
+			commandDisplay(editWin, comWin);
 			while((ch = wgetch(editWin)) != EOF && quit == false) {
 				switch(ch) {
 					case KEY_UP : getyx(editWin, y, x);
 							wmove(editWin,--y,x);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case KEY_DOWN : getyx(editWin, y, x);
 							wmove(editWin, ++y, x);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case KEY_RIGHT : getyx(editWin, y, x);
 							 wmove(editWin, y, ++x);
-							 commendDisplay(editWin, comWin);
+							 commandDisplay(editWin, comWin);
 							 break;
 					case KEY_LEFT : getyx(editWin, y, x);
 							wmove(editWin, y, --x);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case VK_ESCAPE : flag = COM_MODEL;
 							break;
@@ -94,19 +94,19 @@ int main(int argc,char *argv[]) {
 							insert(editWin, comWin, &prev, ch, &flag);
 							break; 
 					case 'i' : isPrintI(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'x' : delX(editWin, &flag, &charBuf);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'B' : setBoldChar(editWin, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'C' : setHighLight(editWin, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					/*case 'w' : delWord(editWin, &prev, &flag, wordBuf);
 							copyWord(editWin, &prev, &flag, wordBuf);
@@ -114,49 +114,49 @@ int main(int argc,char *argv[]) {
 							moveWord(editWin, &prev, &flag);
 							setBoldWord(editWin, &prev, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					*/
 					case 'l' : delLine(editWin, &prev, &flag, lineBuf);
 							copyLine(editWin, &prev, &flag, lineBuf);
 							pasteLine(editWin, &prev, &flag, lineBuf);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'e' : delToEnd(editWin, &prev, &flag);
 							moveLineEnd(editWin, &prev, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'G' : moveNum(editWin, &prev, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'r' : replaceChar(editWin, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'o' : insertLineUnder(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'O' : insertLineAbove(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case 'R' : replaceLine(editWin, &flag);
 							insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case VK_ENTER : enterKey(editWin, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case KEY_BACKSPACE : backspaceDel(editWin, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					case VK_TAB : tabKey(editWin, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 					default : insert(editWin, comWin, &prev, ch, &flag);
-							commendDisplay(editWin, comWin);
+							commandDisplay(editWin, comWin);
 							break;
 				}
 			}
@@ -172,7 +172,7 @@ void isPrintI(WINDOW *editWin,WINDOW *comWin,int *prev,int ch,int *flag) {
 		*flag = INS_MODEL;
 }
 
-void commendDisplay(WINDOW *editWin, WINDOW *comWin) {
+void commandDisplay(WINDOW *editWin, WINDOW *comWin) {
 	int editY, editX, comY, comX;
 	int maxy, maxx;
 	getyx(editWin, editY, editX);
@@ -681,7 +681,7 @@ int isPrint(WINDOW *editWin, WINDOW *comWin, FILE *fp, int *prev, int ch, int *f
 				default : wmove(comWin,0,1);
 						  wclrtoeol(comWin);
 						  wrefresh(comWin);
-						  mvwprintw(comWin, 0, 1, "%c is not a commend!", ch);
+						  mvwprintw(comWin, 0, 1, "%c is not a command!", ch);
 			}
 		}
 		mvwprintw(comWin, 0, 1, "%s", str);
