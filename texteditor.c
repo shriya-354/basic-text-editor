@@ -52,14 +52,14 @@ int main(int argc,char *argv[]) {
 			int flag = COM_MODEL;
 			int wordBuf[WORD_BUF_NUM], lineBuf[LINE_BUF_NUM];
 
-			initscr();
+			initscr(); /*initscr() initializes the terminal in curses mode*/
 			start_color();
 			cbreak();
-			noecho();
+			noecho(); /*  switches off echoing */
 			editWin = derwin(stdscr, LINES- 1, COLS, 0, 0);
 			comWin = derwin(stdscr, 1,COLS, LINES - 1, 0);
 			scrollok(editWin,TRUE);
-			refresh();
+			refresh(); //prints data on stdscr screen
 			keypad(stdscr, TRUE);
 			keypad(editWin, TRUE);
 			keypad(comWin, TRUE);
@@ -68,7 +68,7 @@ int main(int argc,char *argv[]) {
 			}
 			getmaxyx(editWin, maxy, maxx);
 			lastLine = getLastLine(editWin, maxy, maxx);
-			wmove(editWin, 0, 0);
+			wmove(editWin, 0, 0); /* moves the cursor to rowth row and colth column */
 			commendDisplay(editWin, comWin);
 			while((ch = wgetch(editWin)) != EOF && quit == false) {
 				switch(ch) {
@@ -299,7 +299,7 @@ void pasteWord(WINDOW *editWin, int *prev, int *flag, int buf[]) {
 	if(*flag == COM_MODEL && *prev == 'p') {
 		while(buf[i] != '\0') {
 			if(isspace(winch(editWin))) {
-				waddch(editWin, buf[i]);
+				waddch(editWin, buf[i]); /* adds a character into the given window*/
 				wmove(editWin, prevY, ++prevX);
 			}
 			else {
